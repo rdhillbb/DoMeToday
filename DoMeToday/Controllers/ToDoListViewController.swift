@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class ToDoListViewController: UITableViewController {
 
@@ -15,11 +16,15 @@ class ToDoListViewController: UITableViewController {
     //let defaults = UserDefaults.standard
     
    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+   let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
-      loadItems()
-
+        print("----------------")
+        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        print("----------------")
+        //loadItems()
+        
     }
     //Mark - Tableview DataSource
     
@@ -52,9 +57,11 @@ class ToDoListViewController: UITableViewController {
         let alert  = UIAlertController(title: "Add New Todey Item", message: "", preferredStyle: .alert)
         
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+        //let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
             
-            let newItem = Item()
+            let newItem = Item(context:self.context)
             newItem.title = textField.text!
+            newItem.done = false
             self.itemArray.append(newItem)
            // self.defaults.set(self.itemArray, forKey: "TodoListArray")
              self.saveItems()
@@ -72,20 +79,18 @@ class ToDoListViewController: UITableViewController {
 
 
 func saveItems(){
-    let encoder = PropertyListEncoder()
+    
     
     do {
-        
-        let data = try encoder.encode(itemArray)
-        try data.write(to: dataFilePath!)
+       try context.save()
     } catch {
-        print("Error in encoding iteam array, \(error)")
+        print("Error Saving context \(error)")
     }
     
     tableView.reloadData()
     
 }
-    func loadItems(){
+/*    func loadItems(){
         if let data = try? Data(contentsOf:dataFilePath!) {
             let decoder = PropertyListDecoder()
             do {
@@ -96,4 +101,5 @@ func saveItems(){
             }
         }
     }
+ */
 } //End Class
